@@ -182,6 +182,7 @@ class mapUtils {
 		})
 	}
 	addMaker() {
+    console.log('addMaker')
 		if (this.multipleSelection.length > 0) {
 			const geometries = this.multipleSelection.map(item => {
 				const {shopId, shopName, userAddress, userPhone,latitude, longitude} = item

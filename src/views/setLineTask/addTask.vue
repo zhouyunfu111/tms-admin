@@ -149,28 +149,39 @@
     },
     watch: {
       async '$route'(to, from) {
+        const infoList = Object.keys(infoWindowData)
+        infoList.forEach(item => {
+          infoWindowData[item].close()
+        })
+        polylineLayer && polylineLayer.setMap(null)
+        infoWindowData = {}
         if(!to.query.id) {
           this.form = {
             lineName: '',
             deliveryDate: [],
             takeCheck: 1
           }
+          polylineLayer = null
           this.tableData = []
           this.multipleSelection = []
-          map && marker.setMap(null)
+          //map && marker.setMap(null)
         } else {
           this.id = to.query.id
+          await this.getShopOrderList()
           await this.getLineDetail()
         }
-        if(to.path === '/addTask'){
+        if(to.path === '/addTask') {
           this.updateMetaTitle()
-          await this.getShopOrderList()
         }
       }
     },
     async mounted() {
+      map = null
+      marker = null
+      polylineLayer = null
+      infoWindowData = {}
       this.updateMetaTitle()
-      this.initMap()
+      await this.initMap()
       await this.getShopOrderList()
       if(this.id){
         await this.getLineDetail()
@@ -194,7 +205,7 @@
           this.lineStatus = status
           this.tableData = [...pointList,...this.tableData]
           await this.$nextTick()
-          this.createInfoWindows(pointList)
+          this.createInfoWindows([...pointList,...this.tableData])
           this.processArray(pointList).forEach(row => {
             this.$refs.multipleTable.toggleRowSelection(row);
           })
@@ -269,7 +280,7 @@
         this.id && (data.taskId = this.id)
         try {
           await addLineTask(data)
-          this.$message.success(`${this.id ? '编辑' : '新增'}'成功`)
+          this.$message.successq(`${this.id ? '编辑' : '新增'}'成功`)
           this.$tab.closeOpenPage({path:'/setLineTask'})
         } catch(e) {
           console.log(e)
@@ -336,6 +347,7 @@
       // 添加maker
       addMaker() {
         if (this.multipleSelection.length > 0) {
+          console.log('addMaker')
           const geometries = this.multipleSelection.map(item => {
             const {shopId, shopName, userAddress, userPhone,latitude, longitude} = item
             infoWindowData['infoWindow_' + shopId].open()
@@ -346,6 +358,7 @@
               properties: { shopId,shopName, userAddress,userPhone }
             }
           })
+          console.log(marker,'marker')
           marker.setGeometries([...geometries,this.start])
         } else {
           marker.setGeometries([this.start])
