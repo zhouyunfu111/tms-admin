@@ -153,7 +153,6 @@
         infoList.forEach(item => {
           infoWindowData[item].close()
         })
-        polylineLayer && polylineLayer.setMap(null)
         infoWindowData = {}
         if(!to.query.id) {
           this.form = {
